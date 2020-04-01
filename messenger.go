@@ -1,14 +1,15 @@
 package main
 
 import (
+    "encoding/json"
     "fmt"
     "github.com/streadway/amqp"
+    "time"
 )
 
-// Messenger consumes and publishes msgs to RabbitMQ
-type Messenger struct {
+type messenger struct {
     host       string
-    port       int
+    port       string
     username   string
     password   string
     vhost      string
@@ -17,18 +18,22 @@ type Messenger struct {
     channel    *amqp.Channel
 }
 
-func (m *Messenger) buildURL() string {
+func (m *messenger) buildURL() string {
     return fmt.Sprintf("amqp://%s:%s@%s:%s/%s", m.username, m.password, m.host, m.port, m.vhost)
 }
 
 // Connect to RabbitMQ
-func (m *Messenger) Connect() error {
+func (m *messenger) connect(connectionAttempts int) error {
     var err error
-
     url := m.buildURL()
+
     m.connection, err = amqp.Dial(url)
     if err != nil {
-        return err
+        if connectionAttempts < 1 {
+            return err
+        }
+        time.Sleep(5 * time.Second)
+        return m.connect(connectionAttempts - 1)
     }
 
     m.channel, err = m.connection.Channel()
@@ -39,8 +44,7 @@ func (m *Messenger) Connect() error {
     return nil
 }
 
-// SetupPublisher setups exchange and queue for publishing
-func (m *Messenger) SetupPublisher(exchangeName, routingKey, queueName string) error {
+func (m *messenger) setupPublisher(exchangeName, routingKey, queueName string) error {
     err := m.channel.ExchangeDeclare(exchangeName, "direct", false, false, false, false, nil)
     if err != nil {
         return err
@@ -59,8 +63,7 @@ func (m *Messenger) SetupPublisher(exchangeName, routingKey, queueName string) e
     return nil
 }
 
-// SetupConsumer setups queue for consuming
-func (m *Messenger) SetupConsumer(queueName string, prefetchCount int) error {
+func (m *messenger) setupConsumer(queueName string, prefetchCount int) error {
     _, err := m.channel.QueueDeclare(queueName, false, false, false, false, nil)
     if err != nil {
         return err
@@ -74,11 +77,14 @@ func (m *Messenger) SetupConsumer(queueName string, prefetchCount int) error {
     return nil
 }
 
-// Publish messages
-func (m *Messenger) Publish(exchangeName, routingKey string, body []byte) error {
-    msg := amqp.Publishing{ContentType: "application/json", AppId: m.appID, Body: body}
+func (m *messenger) publishItem(exchangeName, routingKey string, item *normalizedItem) error {
+    body, err := json.Marshal(item)
+    if err != nil {
+        return err
+    }
 
-    err := m.channel.Publish(exchangeName, routingKey, true, false, msg)
+    msg := amqp.Publishing{ContentType: "application/json", AppId: m.appID, Body: body}
+    err = m.channel.Publish(exchangeName, routingKey, true, false, msg)
     if err != nil {
         return err
     }
@@ -86,8 +92,7 @@ func (m *Messenger) Publish(exchangeName, routingKey string, body []byte) error 
     return nil
 }
 
-// Consume messages
-func (m *Messenger) Consume(queueName string, callback func([]byte) error) error {
+func (m *messenger) consumeItem(queueName string, callback func(item *item, m *messenger) error) error {
     msgs, err := m.channel.Consume(queueName, "", false, false, false, false, nil)
     if err != nil {
         return err
@@ -95,7 +100,12 @@ func (m *Messenger) Consume(queueName string, callback func([]byte) error) error
 
     go func() {
         for msg := range msgs {
-            err = callback(msg.Body)
+            item := item{}
+            err := json.Unmarshal(msg.Body, &item)
+            if err != nil {
+                msg.Nack(false, true)
+            }
+            err = callback(&item, m)
             if err != nil {
                 msg.Nack(false, true)
             }
@@ -106,7 +116,6 @@ func (m *Messenger) Consume(queueName string, callback func([]byte) error) error
     return nil
 }
 
-// Close connection to RabbitMQ
-func (m *Messenger) Close() {
+func (m *messenger) close() {
     m.connection.Close()
 }
