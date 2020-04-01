@@ -1,77 +1,77 @@
 package main
 
 import (
-    "fmt"
     "strconv"
 )
 
-type item struct {
-    id            string
-    source        string
-    name          string
-    description   string
-    categories    []string
-    lang          string
-    urls          []string
-    imageUrls     []string
-    dimensions    map[string]string
-    price         string
-    priceCurrency string
+// Item ...
+type Item struct {
+    ID            string
+    Source        string
+    Name          string
+    Description   string
+    Categories    []string
+    Lang          string
+    Urls          []string
+    ImageUrls     []string
+    Dimensions    map[string]string
+    Price         string
+    PriceCurrency string
 }
 
-type dimensions struct {
-    height float64
-    width  float64
-    depth  float64
+// Dimensions ...
+type Dimensions struct {
+    Height float64
+    Width  float64
+    Depth  float64
 }
 
-type normalizedItem struct {
-    id            string
-    source        string
-    name          string
-    description   string
-    categories    []string
-    lang          string
-    urls          []string
-    imageUrls     []string
-    dimensions    *dimensions
-    price         float64
-    priceCurrency string
+// NormalizedItem ...
+type NormalizedItem struct {
+    ID            string
+    Source        string
+    Name          string
+    Description   string
+    Categories    []string
+    Lang          string
+    Urls          []string
+    ImageUrls     []string
+    Dimensions    *Dimensions
+    Price         float64
+    PriceCurrency string
 }
 
-func normalize(item *item) (*normalizedItem, error) {
-    fmt.Printf("%+v\n", item)
-
-    dimensions, err := normalizeDimensions(item.dimensions)
+func normalize(item *Item) (*NormalizedItem, error) {
+    dimensions, err := normalizeDimensions(item.Dimensions)
     if err != nil {
         return nil, err
     }
 
-    price, err := normalizePrice(item.price)
+    price, err := normalizePrice(item.Price)
     if err != nil {
         return nil, err
     }
 
-    return &normalizedItem{
-        id:            item.id,
-        source:        item.source,
-        name:          item.name,
-        description:   item.description,
-        categories:    item.categories,
-        lang:          item.lang,
-        urls:          item.urls,
-        imageUrls:     item.imageUrls,
-        dimensions:    dimensions,
-        price:         price,
-        priceCurrency: item.priceCurrency,
+    return &NormalizedItem{
+        ID:            item.ID,
+        Source:        item.Source,
+        Name:          item.Name,
+        Description:   item.Description,
+        Categories:    item.Categories,
+        Lang:          item.Lang,
+        Urls:          item.Urls,
+        ImageUrls:     item.ImageUrls,
+        Dimensions:    dimensions,
+        Price:         price,
+        PriceCurrency: item.PriceCurrency,
     }, nil
 }
 
-func normalizeDimensions(dimensionsMap map[string]string) (*dimensions, error) {
-    return &dimensions{
-        height: 12.2,
-        width:  13.3,
-        depth:  14.4,
+func normalizeDimensions(dimensionsMap map[string]string) (*Dimensions, error) {
+    return &Dimensions{
+        Height: 0.0,
+        Width:  0.0,
+        Depth:  0.0,
     }, nil
 }
 

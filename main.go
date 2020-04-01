@@ -12,7 +12,7 @@ func getEnv(key, fallback string) string {
     return fallback
 }
 
-func processItem(item *item, m *messenger) error {
+func processItem(item *Item, m *messenger) error {
     normalizedItem, err := normalize(item)
     if err != nil {
         return err

@@ -77,7 +77,7 @@ func (m *messenger) setupConsumer(queueName string, prefetchCount int) error {
     return nil
 }
 
-func (m *messenger) publishItem(exchangeName, routingKey string, item *normalizedItem) error {
+func (m *messenger) publishItem(exchangeName, routingKey string, item *NormalizedItem) error {
     body, err := json.Marshal(item)
     if err != nil {
         return err
@@ -92,7 +92,7 @@ func (m *messenger) publishItem(exchangeName, routingKey string, item *normalize
     return nil
 }
 
-func (m *messenger) consumeItem(queueName string, callback func(item *item, m *messenger) error) error {
+func (m *messenger) consumeItem(queueName string, callback func(item *Item, m *messenger) error) error {
     msgs, err := m.channel.Consume(queueName, "", false, false, false, false, nil)
     if err != nil {
         return err
@@ -100,15 +100,21 @@ func (m *messenger) consumeItem(queueName string, callback func(item *item, m *m
 
     go func() {
         for msg := range msgs {
-            item := item{}
+            item := Item{}
             err := json.Unmarshal(msg.Body, &item)
             if err != nil {
-                msg.Nack(false, true)
+                fmt.Println("could not decode JSON-encoded item: " + err.Error())
+                msg.Nack(false, false)
+                continue
             }
+
             err = callback(&item, m)
             if err != nil {
-                msg.Nack(false, true)
+                fmt.Println("could not normalized item: " + err.Error())
+                msg.Nack(false, false)
+                continue
             }
+
             msg.Ack(false)
         }
     }()
