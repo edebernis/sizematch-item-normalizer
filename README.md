@@ -1,2 +1,2 @@
-# sizematch-normalizer
-Normalize data of Sizematch app
+# sizematch-item-normalizer
+Normalize items and publish them into RabbitMQ

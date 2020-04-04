@@ -18,9 +18,9 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=user
       - RABBITMQ_PASSWORD=password
-      - RABBITMQ_APP_ID=sizematch-ikea-normalizer
-      - CONSUMER_QUEUE_NAME=sizematch-normalizer
+      - RABBITMQ_APP_ID=sizematch-item-normalizer
+      - CONSUMER_QUEUE_NAME=sizematch-item-normalizer
       - PREFETCH_COUNT=2
       - PUBLISHER_EXCHANGE_NAME=sizematch-items
       - PUBLISHER_ROUTING_KEY=items.save
-      - PUBLISHER_QUEUE_NAME=sizematch-saver
+      - PUBLISHER_QUEUE_NAME=sizematch-item-saver

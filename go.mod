@@ -1,4 +1,4 @@
-module github.com/edebernis/sizematch-normalizer
+module github.com/edebernis/sizematch-item-normalizer
 
 go 1.13
 
