@@ -3,6 +3,8 @@ package main
 import (
     "encoding/json"
     "fmt"
+    "github.com/edebernis/sizematch-protobuf/build/go/items"
+    "github.com/golang/protobuf/proto"
     "github.com/streadway/amqp"
     "time"
 )
@@ -77,13 +79,13 @@ func (m *messenger) setupConsumer(queueName string, prefetchCount int) error {
     return nil
 }
 
-func (m *messenger) publishItem(exchangeName, routingKey string, item *NormalizedItem) error {
+func (m *messenger) publishItem(exchangeName, routingKey string, item *items.NormalizedItem) error {
     body, err := json.Marshal(item)
     if err != nil {
         return err
     }
 
-    msg := amqp.Publishing{ContentType: "application/json", AppId: m.appID, Body: body}
+    msg := amqp.Publishing{ContentType: "application/protobuf", AppId: m.appID, Body: body}
     err = m.channel.Publish(exchangeName, routingKey, true, false, msg)
     if err != nil {
         return err
@@ -92,7 +94,7 @@ func (m *messenger) publishItem(exchangeName, routingKey string, item *Normalize
     return nil
 }
 
-func (m *messenger) consumeItem(queueName string, callback func(item *Item, m *messenger) error) error {
+func (m *messenger) consumeItem(queueName string, callback func(item *items.Item, m *messenger) error) error {
     msgs, err := m.channel.Consume(queueName, "", false, false, false, false, nil)
     if err != nil {
         return err
@@ -100,10 +102,10 @@ func (m *messenger) consumeItem(queueName string, callback func(item *Item, m *m
 
     go func() {
         for msg := range msgs {
-            item := Item{}
-            err := json.Unmarshal(msg.Body, &item)
+            item := items.Item{}
+            err := proto.Unmarshal(msg.Body, &item)
             if err != nil {
-                fmt.Println("could not decode JSON-encoded item: " + err.Error())
+                fmt.Println("could not decode protobuf item: " + err.Error())
                 msg.Nack(false, false)
                 continue
             }

@@ -1,6 +1,8 @@
 package main
 
 import (
+    "github.com/edebernis/sizematch-item-normalizer/normalizer"
+    "github.com/edebernis/sizematch-protobuf/build/go/items"
     "os"
     "strconv"
 )
@@ -12,8 +14,8 @@ func getEnv(key, fallback string) string {
     return fallback
 }
 
-func processItem(item *Item, m *messenger) error {
-    normalizedItem, err := normalize(item)
+func processItem(item *items.Item, m *messenger) error {
+    normalizedItem, err := normalizer.Normalize(item)
     if err != nil {
         return err
     }

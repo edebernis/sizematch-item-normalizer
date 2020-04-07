@@ -1,9 +1,20 @@
-FROM golang:1.13
+FROM golang:1.13 as builder
 
 WORKDIR /go/src/app
 COPY . .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+ARG GITHUB_TOKEN
+ENV GITHUB_TOKEN=$GITHUB_TOKEN
 
-CMD ["sizematch-item-normalizer"]
+ENV GOPRIVATE github.com/edebernis
+RUN echo "machine github.com login edebernis password ${GITHUB_TOKEN}" > $HOME/.netrc
+
+RUN GOOS=linux \
+    CGO_ENABLED=0 \
+    go build -a -installsuffix cgo -o sizematch-item-normalizer
+
+# ---------------------------------------------------------------------
+FROM alpine:3.11
+COPY --from=builder /go/src/app/sizematch-item-normalizer /
+
+ENTRYPOINT ["/sizematch-item-normalizer"]

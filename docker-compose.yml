@@ -8,8 +8,11 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
-  app:
-    build: .
+  normalizer:
+    build:
+      context: .
+      args:
+        GITHUB_TOKEN: $GITHUB_TOKEN
     depends_on:
       - rabbitmq
     restart: unless-stopped
