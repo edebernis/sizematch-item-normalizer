@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "github.com/edebernis/sizematch-item-normalizer/normalizer"
     "github.com/edebernis/sizematch-protobuf/build/go/items"
     "os"
@@ -14,17 +15,26 @@ func getEnv(key, fallback string) string {
     return fallback
 }
 
-func processItem(item *items.Item, m *messenger) error {
-    normalizedItem, err := normalizer.Normalize(item)
-    if err != nil {
-        return err
-    }
+func run(m *messenger) error {
+    err := m.consumeItem(os.Getenv("CONSUMER_QUEUE_NAME"), func(item *items.Item) error {
+        normalizedItem, err := normalizer.Normalize(item)
+        if err != nil {
+            fmt.Println("could not normalize item: " + err.Error())
+            return err
+        }
 
-    err = m.publishItem(
-        os.Getenv("PUBLISHER_EXCHANGE_NAME"),
-        os.Getenv("PUBLISHER_ROUTING_KEY"),
-        normalizedItem,
-    )
+        err = m.publishItem(
+            os.Getenv("PUBLISHER_EXCHANGE_NAME"),
+            os.Getenv("PUBLISHER_ROUTING_KEY"),
+            normalizedItem,
+        )
+        if err != nil {
+            fmt.Println("could not publish item: " + err.Error())
+            return err
+        }
+
+        return nil
+    })
     if err != nil {
         return err
     }
@@ -77,12 +87,9 @@ func main() {
 
     forever := make(chan bool)
 
-    err = m.consumeItem(
-        os.Getenv("CONSUMER_QUEUE_NAME"),
-        processItem,
-    )
+    err = run(&m)
     if err != nil {
-        panic("could not consume items: " + err.Error())
+        panic("could not setup run: " + err.Error())
     }
 
     <-forever
