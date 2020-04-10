@@ -74,7 +74,7 @@ func (n *normalizer) Source() (string, error) {
 }
 
 func (n *normalizer) Lang() (items.Lang, error) {
-    return items.Lang_EN, nil
+    return n.Item.Lang, nil
 }
 
 func (n *normalizer) Urls() ([]string, error) {
@@ -133,7 +133,7 @@ func (n *normalizer) Dimensions() ([]*items.Dimension, error) {
 func (n *normalizer) Price() (*items.Price, error) {
     if n.Item.Price == 0 && n.Item.PriceCurrency == "" {
         return &items.Price{
-            Price:    0,
+            Amount:   0,
             Currency: 0,
         }, nil
     }
@@ -144,7 +144,7 @@ func (n *normalizer) Price() (*items.Price, error) {
     }
 
     return &items.Price{
-        Price:    n.Item.Price,
+        Amount:   n.Item.Price,
         Currency: currency,
     }, nil
 }
