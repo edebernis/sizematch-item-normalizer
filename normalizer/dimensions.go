@@ -25,6 +25,26 @@ var dimensions = []dimension{
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
+        Name:            items.Dimension_LENGTH,
+        NameRegexp:      regexp.MustCompile(`(?is)length`),
+        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
+    },
+    {
+        Name:            items.Dimension_DIAMETER,
+        NameRegexp:      regexp.MustCompile(`(?is)diameter`),
+        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
+    },
+    {
+        Name:            items.Dimension_THICKNESS,
+        NameRegexp:      regexp.MustCompile(`(?is)thickness`),
+        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
+    },
+    {
+        Name:            items.Dimension_VOLUME,
+        NameRegexp:      regexp.MustCompile(`(?is)volume`),
+        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mm3|cm3|m3|l)`),
+    },
+    {
         Name:            items.Dimension_WEIGHT,
         NameRegexp:      regexp.MustCompile(`(?is)weight`),
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>gs?|kgs?)`),
@@ -69,6 +89,20 @@ func (d *dimension) ParseUnit(s string) (items.Dimension_Unit, error) {
         return items.Dimension_G, nil
     case "kg", "kgs":
         return items.Dimension_KG, nil
+    case "mm2":
+        return items.Dimension_MM2, nil
+    case "cm2":
+        return items.Dimension_CM2, nil
+    case "m2":
+        return items.Dimension_M2, nil
+    case "mm3":
+        return items.Dimension_MM3, nil
+    case "cm3":
+        return items.Dimension_CM3, nil
+    case "m3":
+        return items.Dimension_M3, nil
+    case "l":
+        return items.Dimension_L, nil
     default:
         return 0, fmt.Errorf("Unknown unit: %s", s)
     }
