@@ -2,7 +2,7 @@ package normalizer
 
 import (
     "fmt"
-    "github.com/edebernis/sizematch-protobuf/build/go/items"
+    "github.com/edebernis/sizematch-protobuf/go/items"
     "reflect"
     "strings"
 )

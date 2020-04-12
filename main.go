@@ -3,7 +3,7 @@ package main
 import (
     "fmt"
     "github.com/edebernis/sizematch-item-normalizer/normalizer"
-    "github.com/edebernis/sizematch-protobuf/build/go/items"
+    "github.com/edebernis/sizematch-protobuf/go/items"
     "os"
     "strconv"
 )
