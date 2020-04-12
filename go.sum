@@ -1,6 +1,5 @@
-github.com/edebernis/sizematch-protobuf v0.0.10 h1:aLXQrhXt+jMlR3WvgpSCaPrgqG5tuLkVWleDVYMh/0M=
-github.com/edebernis/sizematch-protobuf/go v0.0.10 h1:HhjawjGQDSR2WpkXfhMbd/33i3MCaoqGzvegDESZ/iY=
-github.com/edebernis/sizematch-protobuf/go v0.0.10/go.mod h1:P9UZuD5YE9NVECUfBocTRL9psA/MdHgYH5Iox16zHUo=
+github.com/edebernis/sizematch-protobuf/go v0.0.11 h1:Tm2EP0NsGltocJ8+oMeLH5Lu8c/dVTGBYsdXfpjynJE=
+github.com/edebernis/sizematch-protobuf/go v0.0.11/go.mod h1:P9UZuD5YE9NVECUfBocTRL9psA/MdHgYH5Iox16zHUo=
 github.com/golang/protobuf v1.3.5 h1:F768QJ1E9tib+q5Sc8MkdJi1RxLTbRcTf8LJV56aRls=
 github.com/golang/protobuf v1.3.5/go.mod h1:6O5/vntMXwX2lRkT1hjjk0nAC1IDOTvTlVgjlRvqsdk=
 github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71 h1:2MR0pKUzlP3SGgj5NYJe/zRYDwOu9ku6YHy+Iw7l5DM=

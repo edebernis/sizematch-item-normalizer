@@ -42,7 +42,7 @@ var dimensions = []dimension{
     {
         Name:            items.Dimension_VOLUME,
         NameRegexp:      regexp.MustCompile(`(?is)volume`),
-        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mm3|cm3|m3|l)`),
+        ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mm3|cm3|m3|ml|cl|l)`),
     },
     {
         Name:            items.Dimension_WEIGHT,
@@ -101,6 +101,10 @@ func (d *dimension) ParseUnit(s string) (items.Dimension_Unit, error) {
         return items.Dimension_CM3, nil
     case "m3":
         return items.Dimension_M3, nil
+    case "ml":
+        return items.Dimension_ML, nil
+    case "cl":
+        return items.Dimension_CL, nil
     case "l":
         return items.Dimension_L, nil
     default:
