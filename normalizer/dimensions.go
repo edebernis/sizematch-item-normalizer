@@ -8,57 +8,103 @@ import (
     "strings"
 )
 
+type dimension struct {
+    Name            items.Dimension_Name
+    NameRegexp      map[items.Lang]*regexp.Regexp
+    ValueUnitRegexp *regexp.Regexp
+}
+
 var dimensions = []dimension{
     {
-        Name:            items.Dimension_HEIGHT,
-        NameRegexp:      regexp.MustCompile(`(?is)height`),
+        Name: items.Dimension_HEIGHT,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)height`),
+            items.Lang_FR: regexp.MustCompile(`(?is)hauteur`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_WIDTH,
-        NameRegexp:      regexp.MustCompile(`(?is)width`),
+        Name: items.Dimension_WIDTH,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)width`),
+            items.Lang_FR: regexp.MustCompile(`(?is)largeur`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_DEPTH,
-        NameRegexp:      regexp.MustCompile(`(?is)depth`),
+        Name: items.Dimension_DEPTH,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)depth`),
+            items.Lang_FR: regexp.MustCompile(`(?is)profondeur`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_LENGTH,
-        NameRegexp:      regexp.MustCompile(`(?is)length`),
+        Name: items.Dimension_LENGTH,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)length`),
+            items.Lang_FR: regexp.MustCompile(`(?is)longueur`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_DIAMETER,
-        NameRegexp:      regexp.MustCompile(`(?is)diameter`),
+        Name: items.Dimension_DIAMETER,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)diameter`),
+            items.Lang_FR: regexp.MustCompile(`(?is)diam(è|e)tre`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_THICKNESS,
-        NameRegexp:      regexp.MustCompile(`(?is)thickness`),
+        Name: items.Dimension_THICKNESS,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)thickness`),
+            items.Lang_FR: regexp.MustCompile(`(?is)(é|e)paisseur`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mms?|cms?|ms?)`),
     },
     {
-        Name:            items.Dimension_VOLUME,
-        NameRegexp:      regexp.MustCompile(`(?is)volume`),
+        Name: items.Dimension_VOLUME,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)(volume|capacity)`),
+            items.Lang_FR: regexp.MustCompile(`(?is)(volume|capacit(é|e))`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>mm3|cm3|m3|ml|cl|l)`),
     },
     {
-        Name:            items.Dimension_WEIGHT,
-        NameRegexp:      regexp.MustCompile(`(?is)weight`),
+        Name: items.Dimension_WEIGHT,
+        NameRegexp: map[items.Lang]*regexp.Regexp{
+            items.Lang_EN: regexp.MustCompile(`(?is)(weight|mass)`),
+            items.Lang_FR: regexp.MustCompile(`(?is)(poids|masse)`),
+        },
         ValueUnitRegexp: regexp.MustCompile(`(?is)(?P<value>\d*\.?\d+)\s*(?P<unit>gs?|kgs?)`),
     },
 }
 
-type dimension struct {
-    Name            items.Dimension_Name
-    NameRegexp      *regexp.Regexp
-    ValueUnitRegexp *regexp.Regexp
+var units = map[string]items.Dimension_Unit{
+    "mm":  items.Dimension_MM,
+    "mms": items.Dimension_MM,
+    "cm":  items.Dimension_CM,
+    "cms": items.Dimension_CM,
+    "m":   items.Dimension_M,
+    "ms":  items.Dimension_M,
+    "g":   items.Dimension_G,
+    "gs":  items.Dimension_G,
+    "kg":  items.Dimension_KG,
+    "kgs": items.Dimension_KG,
+    "mm2": items.Dimension_MM2,
+    "cm2": items.Dimension_CM2,
+    "m2":  items.Dimension_M2,
+    "mm3": items.Dimension_MM3,
+    "cm3": items.Dimension_CM3,
+    "m3":  items.Dimension_M3,
+    "ml":  items.Dimension_ML,
+    "cl":  items.Dimension_CL,
+    "l":   items.Dimension_L,
 }
 
-func (d *dimension) MatchName(s string) bool {
-    return d.NameRegexp.MatchString(s)
+func (d *dimension) MatchName(s string, l items.Lang) bool {
+    return d.NameRegexp[l].MatchString(s)
 }
 
 func (d *dimension) GetValueAndUnit(s string) (float64, items.Dimension_Unit, error) {
@@ -70,52 +116,14 @@ func (d *dimension) GetValueAndUnit(s string) (float64, items.Dimension_Unit, er
     if err != nil {
         return 0, 0, err
     }
-    unit, err := d.ParseUnit(match[2])
-    if err != nil {
-        return 0, 0, err
-    }
+    unit := units[strings.ToLower(match[2])]
     return value, unit, nil
 }
 
-func (d *dimension) ParseUnit(s string) (items.Dimension_Unit, error) {
-    switch strings.ToLower(s) {
-    case "mm", "mms":
-        return items.Dimension_MM, nil
-    case "cm", "cms":
-        return items.Dimension_CM, nil
-    case "m", "ms":
-        return items.Dimension_M, nil
-    case "g", "gs":
-        return items.Dimension_G, nil
-    case "kg", "kgs":
-        return items.Dimension_KG, nil
-    case "mm2":
-        return items.Dimension_MM2, nil
-    case "cm2":
-        return items.Dimension_CM2, nil
-    case "m2":
-        return items.Dimension_M2, nil
-    case "mm3":
-        return items.Dimension_MM3, nil
-    case "cm3":
-        return items.Dimension_CM3, nil
-    case "m3":
-        return items.Dimension_M3, nil
-    case "ml":
-        return items.Dimension_ML, nil
-    case "cl":
-        return items.Dimension_CL, nil
-    case "l":
-        return items.Dimension_L, nil
-    default:
-        return 0, fmt.Errorf("Unknown unit: %s", s)
-    }
-}
-
-func findDimension(name string) (*dimension, error) {
+func findDimension(name string, lang items.Lang) (*dimension, error) {
     result := (*dimension)(nil)
     for i, d := range dimensions {
-        if d.MatchName(name) {
+        if d.MatchName(name, lang) {
             if result != nil {
                 return nil, fmt.Errorf("Multiple matching dimensions for name: %s", name)
             }

@@ -104,7 +104,7 @@ func (n *normalizer) ImageUrls() ([]string, error) {
 func (n *normalizer) Dimensions() ([]*items.Dimension, error) {
     itemMatchedDimensions := map[*dimension][]string{}
     for key, value := range n.Item.Dimensions {
-        d, err := findDimension(key)
+        d, err := findDimension(key, n.Item.Lang)
         if err != nil {
             fmt.Println(err.Error())
             continue
