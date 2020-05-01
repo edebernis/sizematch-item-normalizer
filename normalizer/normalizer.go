@@ -73,6 +73,10 @@ func (n *normalizer) Source() (string, error) {
     return n.Item.Source, nil
 }
 
+func (n *normalizer) Brand() (string, error) {
+    return strings.TrimSpace(n.Item.Brand), nil
+}
+
 func (n *normalizer) Lang() (items.Lang, error) {
     return n.Item.Lang, nil
 }
@@ -99,6 +103,14 @@ func (n *normalizer) Categories() ([]string, error) {
 
 func (n *normalizer) ImageUrls() ([]string, error) {
     return n.Item.ImageUrls, nil
+}
+
+func (n *normalizer) Colors() ([]string, error) {
+    colors := make([]string, len(n.Item.Colors))
+    for i, color := range n.Item.Colors {
+        colors[i] = strings.TrimSpace(color)
+    }
+    return colors, nil
 }
 
 func (n *normalizer) Dimensions() ([]*items.Dimension, error) {
